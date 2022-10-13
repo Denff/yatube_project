@@ -1,16 +1,25 @@
-# from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
-from django.http import HttpResponse
+from .models import Group, Post
 
-# Create your views here.
-# Главная страница
-def index(request):    
-    return HttpResponse('Главная страница')
+NUMBER_OF_POSTS:int = 10
 
-# Страница со списком постов
-def group_posts(request):
-  return HttpResponse('Список постов по группам')
 
-# Страница с информацией об конкретной группе постов
-def group_posts_detail(request, slug):
-    return HttpResponse(f'Группа {slug}') 
+def index(request):
+    posts = Post.objects.select_related('author')[:NUMBER_OF_POSTS]
+
+    context = {
+        'posts': posts,
+    }
+    return render(request, 'posts/index.html', context)
+
+
+def group_posts(request, slug):
+    group = get_object_or_404(Group, slug=slug)
+    posts = group.posts.select_related('author')[:NUMBER_OF_POSTS]
+ 
+    context = {
+        'group': group,
+        'posts': posts,
+    }
+    return render(request, 'posts/group_list.html', context)
